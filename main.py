@@ -37,7 +37,7 @@ def open_json(json_path):
 
 
 def write_csv(csv_path, all_data):
-    with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
+    with open(csv_path, 'w', newline='') as csvfile:
         try: 
             fieldnames = ['quest_id', 'quest_nome', 'materia', 'ano_escolar', 
                           'nome_etapa', 'content_ativo', 'content_nome', 
@@ -54,9 +54,9 @@ def write_csv(csv_path, all_data):
 
 all_rows = []
 
-csv_path = '/home/kakaiser/iguin/dev/python/extract_json_files/aulas.csv'
+csv_path = '' #path of the csv file
 
-folder_path = '/home/kakaiser/Documents/json/'
+folder_path = ''#path to the folder of the jsons files
 
 i = 0
 for file in os.listdir(folder_path):
