@@ -9,6 +9,13 @@ def open_json(json_path):
         with open(json_path, 'r', encoding='utf-8') as json_file:
             raw_data: dict = json.load(json_file)
 
+
+            # Only save if 'istemplate' is True and 'datafim' does not exist 
+
+            if raw_data['istemplate'] != True:
+                print(f'{json_path} istemplate = False')
+                return 
+            
             for step in raw_data['quest_steps']:
                 for content in step['n_contents']:
                     for answer in content['relx_answers']:
@@ -27,7 +34,21 @@ def open_json(json_path):
                         data['answer_texto'] = answer.get('titulo', '').replace('\n', ' ')  
                         data['answer_correct'] = answer.get('resposta_correta', '') 
 
-                        all_rows.append(data)
+                        # Only save if 'istemplate' is True and 'datafim' does not exist 
+                        datafim = (
+                            raw_data.get('datafim')
+                            or step.get('datafim')
+                            or content.get('datafim')
+                            or answer.get('datafim')
+                        )
+
+                        if datafim is not None:
+                            print(f'{json_path} datafim is not None')
+  
+
+                        if datafim is None:
+
+                            all_rows.append(data)
             
             return
     
