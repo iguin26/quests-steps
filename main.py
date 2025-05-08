@@ -1,18 +1,17 @@
 import os 
 import json
-import csv
+import pandas as pd
+from dotenv import load_dotenv
+load_dotenv()
 
 def open_json(json_path):
     try:
         with open(json_path, 'r', encoding='utf-8') as json_file:
             raw_data: dict = json.load(json_file)
 
-
-
             for step in raw_data['quest_steps']:
                 for content in step['n_contents']:
                     for answer in content['relx_answers']:
-
                         data = {}
                         data['quest_id'] = raw_data.get('id', '')
                         data['quest_nome'] = raw_data.get('nome', '').replace('\n', ' ')
@@ -29,36 +28,28 @@ def open_json(json_path):
                         data['answer_correct'] = answer.get('resposta_correta', '') 
 
                         all_rows.append(data)
+            
+            return
     
     except Exception as e:
         print(f"Deu erro em {json_path} - Error: {e}")
+        return
 
 
-
-
-def write_csv(csv_path, all_data):
-    with open(csv_path, 'w', newline='') as csvfile:
-        try: 
-            fieldnames = ['quest_id', 'quest_nome', 'materia', 'ano_escolar', 
-                          'nome_etapa', 'content_ativo', 'content_nome', 
-                          'answer_texto', 'answer_correct']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(all_data)
-
-        except Exception as e:
-          print(f"Deu erro NA HORA DE COLOCAR NO CSV  - Error: {e}")
-
-
-
+def write_excel(xlsx_path, all_data):
+    try:
+        df = pd.DataFrame(all_data)
+        df.to_excel(xlsx_path, index=False)
+        print("Sucessuful operation")
+    except Exception as e:
+        print(f"ERROR IN  XLSX - Error: {e}")
 
 all_rows = []
 
-csv_path = '' #path of the csv file
+xlsx_path =  os.getenv("XLSX_PATH") #path of the csv file
+folder_path = os.getenv("FOLDER_PATH") #path to the folder of the jsons files
 
-folder_path = ''#path to the folder of the jsons files
-
-i = 0
+# i = 0
 for file in os.listdir(folder_path):
     json_path = os.path.join(folder_path, file)
     open_json(json_path)
@@ -66,4 +57,4 @@ for file in os.listdir(folder_path):
     #     break
     # i += 1
 
-write_csv(csv_path, all_rows)
+write_excel(xlsx_path, all_rows)
