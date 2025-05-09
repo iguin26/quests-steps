@@ -17,58 +17,72 @@ def open_json(json_path):
             
             for step in raw_data['quest_steps']:
                 for content in step['n_contents']:
+                    data = {}
+                    data['quest_id'] = raw_data.get('id', '')
+                    data['quest_nome'] = raw_data.get('nome', '').replace('\n', ' ')
+                    data['materia'] = raw_data.get('rel_materia', {}).get('nome', '').replace('\n', ' ')
+                    data['ano_escolar'] = raw_data.get('rel_anoescolar', {}).get('nome', '').replace('\n', ' ')
+
+                    data['nome_etapa'] = step.get('apelido', '').replace('\n', ' ')
+
+                    data['content_ativo'] = content.get('ativo', '').replace('\n', ' ')
+                    data['content_nome'] = content.get('description', '').replace('\n', ' ')
+
+
+                    if content['content_type'] != 0:
+                        continue
+
+                    obj = {
+                        0: "Escolha Única",
+                        1: "Verdadeiro/Falso",
+                        2: "Múltipla Escolha",
+                        3: "Preencha as Lacunas",
+                        4: "Correspondente",
+                        5: "Imagens Correspondentes",
+                        6: "Ordenação",
+                        7: "Dissertativa"
+                    }
+
+                    raw_question_type = content['question_type']
+
+                    question_type = obj[raw_question_type]
+
+                    data['question_type'] = question_type
+
+                    data['answer_options'] = {}
+                
+                    key = 1
                     for answer in content['relx_answers']:
-                        data = {}
-                        data['quest_id'] = raw_data.get('id', '')
-                        data['quest_nome'] = raw_data.get('nome', '').replace('\n', ' ')
-                        data['materia'] = raw_data.get('rel_materia', {}).get('nome', '').replace('\n', ' ')
-                        data['ano_escolar'] = raw_data.get('rel_anoescolar', {}).get('nome', '').replace('\n', ' ')
-
-                        data['nome_etapa'] = step.get('apelido', '').replace('\n', ' ')
-
-                        data['content_ativo'] = content.get('ativo', '').replace('\n', ' ')
-                        data['content_nome'] = content.get('description', '').replace('\n', ' ')
-
                         
-                        data['answer_texto'] = answer.get('titulo', '').replace('\n', ' ')  
-                        data['answer_correct'] = answer.get('resposta_correta', '') 
+                        datafim_answer = answer.get('datafim')
 
-                        data['question_type'] = ''
+                        if datafim_answer is not None:
+                            continue
 
-                        if content['content_type'] == 0:
-                            obj = {
-                                0: "Escolha Única",
-                                1: "Verdadeiro/Falso",
-                                2: "Múltipla Escolha",
-                                3: "Preencha as Lacunas",
-                                4: "Correspondente",
-                                5: "Imagens Correspondentes",
-                                6: "Ordenação",
-                                7: "Dissertativa"
-                            }
+                        data['answer_options'][key] = answer.get('titulo', '').replace('\n', ' ')
+                        key += 1
+                        print(data['answer_options'])
+                        # data['answer_options'].append(answer.get('titulo', '').replace('\n', ' '))
 
-                            raw_question_type = content['question_type']
-
-                            question_type = obj[raw_question_type]
-
-                            data['question_type'] = question_type
+                        if answer.get('resposta_correta') == True:
+                            data['reposta_correta'] = answer.get('titulo', '')
 
 
-                        # Only save if 'istemplate' is True and 'datafim' does not exist 
-                        datafim = (
-                            raw_data.get('datafim')
-                            or step.get('datafim')
-                            or content.get('datafim')
-                            or answer.get('datafim')
-                        )
 
-                        if datafim is not None:
-                            print(f'{json_path} datafim is not None')
-  
+                    # Only save if 'istemplate' is True and 'datafim' does not exist 
+                    datafim = (
+                        raw_data.get('datafim')
+                        or step.get('datafim')
+                        or content.get('datafim')
+                    )
 
-                        if datafim is None:
+                    if datafim is not None:
+                        print(f'{json_path} datafim is not None')
 
-                            all_rows.append(data)
+
+                    if datafim is None:
+
+                        all_rows.append(data)
             
             return
     
@@ -91,12 +105,12 @@ all_rows = []
 xlsx_path =  os.getenv("XLSX_PATH") #path of the csv file
 folder_path = os.getenv("FOLDER_PATH") #path to the folder of the jsons files
 
-# i = 0
+i = 0
 for file in os.listdir(folder_path):
     json_path = os.path.join(folder_path, file)
     open_json(json_path)
-    # if i == 0:
-    #     break
-    # i += 1
+    if i == 00:
+        break
+    i += 1
 
 write_excel(xlsx_path, all_rows)
