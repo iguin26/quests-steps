@@ -4,12 +4,21 @@ import pandas as pd
 from dotenv import load_dotenv
 load_dotenv()
 
+grade_number=1
+xlsx_path =  f"path/{grade_number}ano/subject.xlsx" #path of the csv file
+
 def open_json(json_path):
     try:
         with open(json_path, 'r', encoding='utf-8') as json_file:
             raw_data: dict = json.load(json_file)
 
             # Only save if 'istemplate' is True and 'datafim' does not exist 
+
+            if raw_data['rel_materia']['nome'] != 'Arte':
+                return 
+            
+            if raw_data['rel_anoescolar']['nome'] != f'{grade_number}º Ano': # 'Ano or Série'
+                return 
 
             if raw_data['istemplate'] != True:
                 print(f'{json_path} istemplate = False')
@@ -88,7 +97,6 @@ def write_excel(xlsx_path, all_data):
 
 all_rows = []
 
-xlsx_path =  os.getenv("XLSX_PATH") #path of the csv file
 folder_path = os.getenv("FOLDER_PATH") #path to the folder of the jsons files
 
 # i = 0
